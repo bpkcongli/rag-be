@@ -28,6 +28,28 @@ class SqlAlchemyDocumentRepository(DocumentRepository):
             for r in rows
         ]
 
+    def get_by_id(self, document_id: str) -> Document | None:
+        stmt = select(DocumentModel).where(DocumentModel.id == document_id)
+        row = self._session.execute(stmt).scalars().first()
+        if row is None:
+            return None
+        return Document(
+            id=row.id,
+            filename=row.filename,
+            file_type=FileType(row.file_type),
+            status=DocumentStatus(row.status),
+            created_at=row.created_at,
+            updated_at=row.updated_at,
+        )
+
+    def update_status(self, *, document_id: str, status: DocumentStatus) -> None:
+        stmt = select(DocumentModel).where(DocumentModel.id == document_id)
+        row = self._session.execute(stmt).scalars().first()
+        if row is None:
+            return
+        row.status = status.value
+        self._session.add(row)
+
     def create(
         self,
         *,
@@ -53,3 +75,5 @@ class SqlAlchemyDocumentRepository(DocumentRepository):
             created_at=model.created_at,
             updated_at=model.updated_at,
         )
+
+

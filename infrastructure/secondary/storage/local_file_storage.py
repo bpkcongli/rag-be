@@ -22,6 +22,28 @@ class LocalFileStorage:
     def _document_dir(self, document_id: str) -> str:
         return os.path.join(self.base_dir, "documents", document_id)
 
+    def get_uploaded_file_path(self, *, document_id: str) -> str:
+        """
+        Return the stored uploaded file path for a document.
+        Assumption: we store exactly 1 uploaded file under the document directory.
+        """
+        doc_dir = self._document_dir(document_id)
+        if not os.path.isdir(doc_dir):
+            raise StorageError(f"Document directory not found: {doc_dir}")
+
+        files = [
+            os.path.join(doc_dir, f)
+            for f in os.listdir(doc_dir)
+            if os.path.isfile(os.path.join(doc_dir, f))
+        ]
+        if not files:
+            raise StorageError(f"No uploaded file found for document_id={document_id}")
+        # deterministic
+        return sorted(files)[0]
+
+    def get_faiss_index_path(self, *, document_id: str, chunking_strategy: str) -> str:
+        return os.path.join(self._document_dir(document_id), "indexes", chunking_strategy, "faiss.index")
+
     def delete_document(self, *, document_id: str) -> None:
         """Best-effort delete of a stored document directory."""
         target_dir = self._document_dir(document_id)
@@ -51,3 +73,21 @@ class LocalFileStorage:
             raise StorageError(f"Failed to store file: {e}") from e
 
         return target_path
+
+    def save_faiss_index(self, *, document_id: str, chunking_strategy: str, index) -> str:
+        """
+        Persist a FAISS index to:
+          {base_dir}/documents/{document_id}/indexes/{chunking_strategy}/faiss.index
+        """
+        import faiss
+
+        target_path = self.get_faiss_index_path(document_id=document_id, chunking_strategy=chunking_strategy.lower())
+        target_dir = os.path.dirname(target_path)
+        try:
+            os.makedirs(target_dir, exist_ok=True)
+            faiss.write_index(index, target_path)
+        except Exception as e:
+            raise StorageError(f"Failed to store FAISS index: {e}") from e
+        return target_path
+
+

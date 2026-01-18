@@ -18,6 +18,9 @@ class Settings(BaseSettings):
 
     storage_dir: str = "/Python/rag-pipeline/storage"
 
+    # Pluggable ML components (can be overridden via .env)
+    embedding_model_name: str = "intfloat/multilingual-e5-base"
+
     @property
     def sqlalchemy_database_uri(self) -> str:
         # Use PyMySQL driver
@@ -35,3 +38,5 @@ def get_settings() -> Settings:
     if _settings is None:
         _settings = Settings()
     return _settings
+
+

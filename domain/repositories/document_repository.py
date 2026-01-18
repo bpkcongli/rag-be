@@ -12,6 +12,14 @@ class DocumentRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def get_by_id(self, document_id: str) -> Document | None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def update_status(self, *, document_id: str, status: DocumentStatus) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
     def create(
         self,
         *,
@@ -21,3 +29,5 @@ class DocumentRepository(ABC):
         status: DocumentStatus,
     ) -> Document:
         raise NotImplementedError
+
+

@@ -12,3 +12,15 @@ class DocumentStatus(str, Enum):
     INDEXING = "INDEXING"
     INDEXED = "INDEXED"
     FAILED = "FAILED"
+
+
+class ChunkingStrategy(str, Enum):
+    SEMANTIC_SLIDING_WINDOW = "SEMANTIC_SLIDING_WINDOW"
+
+
+class VectorIndexStatus(str, Enum):
+    BUILDING = "BUILDING"
+    READY = "READY"
+    FAILED = "FAILED"
+
+

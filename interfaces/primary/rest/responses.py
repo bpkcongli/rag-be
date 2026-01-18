@@ -16,8 +16,11 @@ class DocumentsData(CamelModel):
 
 DocumentsListResponse = ApiResponse[DocumentsData]
 DocumentObjectResponse = ApiResponse[DocumentDTO]
+EmptyResponse = ApiResponse[None]
 
 
 def success_response(*, data: Optional[object] = None):
     # Typed wrappers are used in endpoints; this is mainly for exception handlers.
     return ApiResponse(status={"code": SUCCESS_CODE, "message": SUCCESS_MESSAGE}, data=data)
+
+

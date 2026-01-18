@@ -1,3 +1,11 @@
+sentence_transformers
+scikit-learn
+transformers
+faiss-cpu
+pymupdf
+torch
+bitsandbytes
+accelerate
 fastapi==0.115.6
 uvicorn[standard]==0.34.0
 python-multipart==0.0.20
@@ -6,3 +14,9 @@ pydantic-settings==2.7.1
 SQLAlchemy==2.0.36
 PyMySQL==1.1.1
 alembic==1.14.0
+numpy==1.26.4
+faiss-cpu==1.8.0.post1
+sentence-transformers==3.3.1
+PyMuPDF==1.24.14
+beautifulsoup4==4.12.3
+python-docx==1.1.2
