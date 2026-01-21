@@ -2,13 +2,33 @@ from __future__ import annotations
 
 from datetime import datetime
 
+import json
+
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.dialects.mysql import ENUM as MYSQL_ENUM
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.types import TypeDecorator
 
 
 class Base(DeclarativeBase):
     pass
+
+
+class JSONText(TypeDecorator):
+    """Store JSON as TEXT for broad MySQL compatibility (no native JSON requirement)."""
+
+    impl = Text
+    cache_ok = True
+
+    def process_bind_param(self, value, dialect):
+        if value is None:
+            return None
+        return json.dumps(value, ensure_ascii=False)
+
+    def process_result_value(self, value, dialect):
+        if value is None:
+            return None
+        return json.loads(value)
 
 
 class DocumentModel(Base):
@@ -61,5 +81,27 @@ class VectorIndexModel(Base):
     )
 
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
+
+
+class RagQueryModel(Base):
+    __tablename__ = "rag_queries"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    query_text: Mapped[str] = mapped_column(Text, nullable=False)
+    scope: Mapped[dict] = mapped_column(JSONText, nullable=True)
+    embedding_model: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    llm_model: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
+
+
+class RagAnswerModel(Base):
+    __tablename__ = "rag_answers"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    rag_query_id: Mapped[int] = mapped_column(Integer, ForeignKey("rag_queries.id"), nullable=False)
+    answer: Mapped[str] = mapped_column(Text, nullable=False)
+    prompt_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    completion_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    latency_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
 

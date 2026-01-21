@@ -21,6 +21,18 @@ class Settings(BaseSettings):
     # Pluggable ML components (can be overridden via .env)
     embedding_model_name: str = "intfloat/multilingual-e5-base"
 
+    reranker_model_name: str = "BAAI/bge-reranker-base"
+    llm_model_name: str = "Qwen/Qwen2.5-0.5B-Instruct"
+    llm_device: str = "cuda"
+
+    # RAG config
+    retrieve_top_n: int = 20
+    rerank_top_k: int = 5
+    max_context_chunks: int = 2
+    max_new_tokens: int = 256
+    temperature: float = 0.2
+    top_p: float = 0.9
+
     @property
     def sqlalchemy_database_uri(self) -> str:
         # Use PyMySQL driver

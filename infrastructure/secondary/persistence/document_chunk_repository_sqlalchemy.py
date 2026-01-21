@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sqlalchemy import delete
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from domain.entities.document_chunk import DocumentChunk
@@ -29,5 +29,25 @@ class SqlAlchemyDocumentChunkRepository(DocumentChunkRepository):
             for c in chunks
         ]
         self._session.add_all(models)
+
+    def list_by_document_id(self, document_id: str) -> list[DocumentChunk]:
+        stmt = (
+            select(DocumentChunkModel)
+            .where(DocumentChunkModel.document_id == document_id)
+            .order_by(DocumentChunkModel.chunk_index.asc())
+        )
+        rows = self._session.execute(stmt).scalars().all()
+        return [
+            DocumentChunk(
+                id=r.id,
+                document_id=r.document_id,
+                chunk_index=int(r.chunk_index),
+                content=r.content,
+                token_count=int(r.token_count),
+                embedding_model=r.embedding_model,
+                created_at=r.created_at,
+            )
+            for r in rows
+        ]
 
 
